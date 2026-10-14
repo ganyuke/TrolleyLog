@@ -1,0 +1,16 @@
+Trolley Log keeps a daily log of your rides on the San Diego Trolley.
+
+Press <b>Board</b> when you board and the date and time are filled in. Type the car number painted by the door, tap the car you are standing in, and pick your stations on a street map with the Trolley lines on it.
+
+<b>Features</b>
+<ul>
+<li>Car drawings that match the kind of car: SD100, S70, S70 US, or S700</li>
+<li>Station map that also works offline once an area has been shown</li>
+<li>Likely trips offered first, such as the way back from your earlier ride</li>
+<li>Brochures you picked up, with names you used before as one-tap choices</li>
+<li>Statistics: day streaks, time and distance on board, a chart of the whole fleet with the cars you have ridden, favorite cars, stations, and trips</li>
+<li>Backup and import of every ride, and export to a spreadsheet</li>
+<li>Colors that follow your wallpaper on Android 12 and later</li>
+</ul>
+
+Station and track data come from the public MTS schedule feed.

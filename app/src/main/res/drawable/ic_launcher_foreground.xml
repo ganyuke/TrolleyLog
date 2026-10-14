@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wireframe trolley nose and first door, inside the adaptive icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M30,66 L30,52 Q31,42 40,41 L78,41 L78,66 Z M40,46 L52,46 L52,54 L36,54 Q37,47 40,46 Z M58,46 L70,46 L70,66 L58,66 Z M64,46 L64,66 M26,66 L78,66 M48,41 L54,33 L62,33 M50,33 L68,33"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M42,70 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 M54,70 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4" />
+</vector>
