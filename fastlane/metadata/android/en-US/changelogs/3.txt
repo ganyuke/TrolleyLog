@@ -1,0 +1,2 @@
+Import a backup or a spreadsheet and replace the rides already in your log with the ones in the file.
+Before an import, you can save a backup first.
