@@ -1,0 +1,5 @@
+Import rides from a CSV file in Settings.
+Train length can be left as not noted, and then your car is front, middle, or rear.
+Note where you were in the car, front or back.
+Rides without an arrival time are counted in total ride time at their scheduled length.
+Backups made with this version can't be opened in Trolley Log 1.0.

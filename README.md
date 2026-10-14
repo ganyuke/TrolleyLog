@@ -17,11 +17,11 @@ Keep a log of every ride you take on the San Diego Trolley from your Android pho
 - Start a new ride from a suggestion for a trip you take often.
 - Keep track of the brochures you pick up.
 - Look through your statistics, including streaks, time and distance on board, your most-used cars and stations, and a chart of the fleet showing which cars you have ridden.
-- Back up and restore your rides, or export them to a CSV file.
+- Back up and restore your rides, or export and import them as a CSV file.
 
 The map uses OpenStreetMap tiles. An area is downloaded the first time you view it and works offline after that.
 
-Importing a backup adds the rides that are missing from your log. Rides you already have are not changed.
+Importing a backup or a CSV file adds the rides that are missing from your log. Rides you already have are not changed. A CSV file needs a Date and a Boarded column, and the other columns of an exported file are read when they are there.
 
 ## Requirements
 
@@ -51,7 +51,7 @@ Uninstall the F-Droid version before installing your own build. They're signed w
 
 ### Updating the station data
 
-The stations and tracks come from the MTS schedule feed. To update them after a service change:
+The stations, tracks, and scheduled ride times come from the MTS schedule feed. To update them after a service change:
 
 ```bash
 curl -LO https://www.sdmts.com/google_transit_files/google_transit.zip

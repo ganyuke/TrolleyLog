@@ -12,6 +12,8 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.nextcolor.trolleylog.data.PlaceInCar
+import org.nextcolor.trolleylog.data.TrainPart
 import org.nextcolor.trolleylog.ui.StationPicker
 import org.nextcolor.trolleylog.ui.TrolleyLogTheme
 import org.robolectric.RobolectricTestRunner
@@ -67,11 +69,20 @@ class ScreenshotTest {
         rule.onRoot().captureRoboImage("build/screenshots/settings-dark.png")
     }
 
-    @Test @Config(qualifiers = "w412dp-h3300dp-xhdpi")
-    fun stats() = app("stats", model(), tab = "Statistics")
+    /** Rides from a log kept before the train length was noted. */
+    private val unnoted = listOf(
+        Samples.ride("u1", Samples.today.minusDays(40), "08:24", car = "4051B", from = "msdS", to = "sdsS", line = "green"),
+        Samples.ride("u2", Samples.today.minusDays(40), "17:45", car = "4030A", from = "sdsS", to = "msdS", line = "green"),
+        Samples.ride("u3", Samples.today.minusDays(41), "08:40", car = "4013A", from = "msdS", to = "sdsS", line = "green"),
+    ).mapIndexed { i, r ->
+        r.copy(trainLength = null, trainPart = if (i == 1) TrainPart.FRONT else TrainPart.REAR, placeInCar = if (i == 1) PlaceInCar.FRONT else PlaceInCar.BACK)
+    }
 
     @Test @Config(qualifiers = "w412dp-h3300dp-xhdpi")
-    fun statsDark() = app("stats-dark", model(), dark = true, tab = "Statistics")
+    fun stats() = app("stats", model(*unnoted.toTypedArray()), tab = "Statistics")
+
+    @Test @Config(qualifiers = "w412dp-h3300dp-xhdpi")
+    fun statsDark() = app("stats-dark", model(*unnoted.toTypedArray()), dark = true, tab = "Statistics")
 
     @Test @Config(qualifiers = "w412dp-h1500dp-xhdpi")
     fun editorGoingBack() = app("editor-going-back", model().apply { startRide(Samples.today.atTime(17, 21)); draft = draft!!.copy(ride = draft!!.ride.copy(car = "5009A", position = 1)) })
@@ -85,6 +96,11 @@ class ScreenshotTest {
     fun editorSharedTrack() = app("editor-shared-track", model().apply {
         draft = Draft(Samples.ride("n", Samples.today, "09:05", "09:21", car = "3004B", length = 2, position = 2, from = "sfdS", to = "oldS",
             brochures = listOf("Rider Alert")), false)
+    })
+
+    @Test @Config(qualifiers = "w412dp-h1500dp-xhdpi")
+    fun editorTrainLengthNotNoted() = app("editor-train-length-not-noted", model().apply {
+        draft = Draft(unnoted[0], false)
     })
 
     @Test fun mapWhole() = shot("map-whole", map = true) { StationPicker(null, null, {}, {}, {}) }

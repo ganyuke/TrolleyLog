@@ -98,7 +98,7 @@ private fun RideRow(ride: Ride, index: Int, count: Int, onClick: () -> Unit) {
                 if (ride.car.isNotEmpty()) {
                     Text(ride.car, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                 }
-                ride.position?.let { Text(carName(it, ride.trainLength) + " car", style = MaterialTheme.typography.labelMedium) }
+                carName(ride)?.let { Text("$it car", style = MaterialTheme.typography.labelMedium) }
             }
         },
     ) {
@@ -119,7 +119,7 @@ fun daySummary(rides: List<Ride>): String {
 }
 
 /**
- * Today's ride as a card: the train drawing up top, then the trip, and a footer with the car and, while still riding, the arrival button.
+ * Today's ride as a card: the train drawing up top when the train length is known, then the trip, and a footer with the car and, while still riding, the arrival button.
  */
 @Composable
 fun RideCard(ride: Ride, onClick: () -> Unit, onArrived: (() -> Unit)?) {
@@ -130,8 +130,10 @@ fun RideCard(ride: Ride, onClick: () -> Unit, onArrived: (() -> Unit)?) {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(20.dp)) {
-            TrainStrip(ride.trainLength, ride.position, ride.carId?.series?.shape, showLabels = false)
-            Spacer(Modifier.height(16.dp))
+            ride.trainLength?.let { length ->
+                TrainStrip(length, ride.position, ride.carId?.series?.shape, showLabels = false)
+                Spacer(Modifier.height(16.dp))
+            }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Network.line(ride.line)?.let { LineDots(listOf(it.color)) }
                 TripLabel(ride.boardStation, ride.exitStation, style = MaterialTheme.typography.titleLarge, arrowSize = 22.dp)
@@ -147,7 +149,7 @@ fun RideCard(ride: Ride, onClick: () -> Unit, onArrived: (() -> Unit)?) {
                 Column(Modifier.weight(1f)) {
                     val car = listOfNotNull(
                         ride.car.takeIf { it.isNotEmpty() },
-                        ride.position?.let { carName(it, ride.trainLength).lowercase() + " car" },
+                        carName(ride)?.let { it.lowercase() + " car" },
                     ).joinToString(", ")
                     if (car.isNotEmpty()) Text(car.replaceFirstChar(Char::uppercase), style = MaterialTheme.typography.titleSmall)
                     val extras = listOfNotNull(

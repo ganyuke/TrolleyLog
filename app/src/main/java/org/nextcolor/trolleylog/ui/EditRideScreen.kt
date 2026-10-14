@@ -71,7 +71,9 @@ import androidx.compose.ui.unit.dp
 import org.nextcolor.trolleylog.Draft
 import org.nextcolor.trolleylog.data.CarId
 import org.nextcolor.trolleylog.data.Network
+import org.nextcolor.trolleylog.data.PlaceInCar
 import org.nextcolor.trolleylog.data.Ride
+import org.nextcolor.trolleylog.data.TrainPart
 import org.nextcolor.trolleylog.logic.Suggestions
 import java.time.Instant
 import java.time.LocalDate
@@ -304,17 +306,34 @@ private fun CarSection(ride: Ride, onChange: (Ride) -> Unit) {
         Panel {
             Text("Train length", style = MaterialTheme.typography.titleSmall)
             ChoiceGroup(
-                (1..Ride.MAX_TRAIN_LENGTH).toList(), ride.trainLength,
-                onSelect = { n -> onChange(ride.copy(trainLength = n, position = ride.position?.takeIf { it <= n })) },
+                (1..Ride.MAX_TRAIN_LENGTH).toList() + null, ride.trainLength,
+                onSelect = { n -> onChange(ride.withTrainLength(n)) },
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("$it") }
+                weight = { if (it == null) 2f else 1f },
+            ) { Text(it?.toString() ?: "Not noted", maxLines = 1) }
             Text("Your car", style = MaterialTheme.typography.titleSmall)
-            TrainStrip(
-                length = ride.trainLength,
-                selected = ride.position,
-                shape = carId?.series?.shape,
-                onSelect = { onChange(ride.copy(position = if (ride.position == it) null else it)) },
-            )
+            val length = ride.trainLength
+            if (length != null) {
+                TrainStrip(
+                    length = length,
+                    selected = ride.position,
+                    shape = carId?.series?.shape,
+                    onSelect = { onChange(ride.copy(position = if (ride.position == it) null else it)) },
+                )
+            } else {
+                // Without a length there is no train to draw, only which part of it.
+                ChoiceGroup(
+                    TrainPart.entries, ride.trainPart,
+                    onSelect = { onChange(ride.copy(trainPart = if (ride.trainPart == it) null else it)) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(it.label) }
+            }
+            Text("Place in car", style = MaterialTheme.typography.titleSmall)
+            ChoiceGroup(
+                PlaceInCar.entries, ride.placeInCar,
+                onSelect = { onChange(ride.copy(placeInCar = if (ride.placeInCar == it) null else it)) },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(it.label) }
         }
     }
 }

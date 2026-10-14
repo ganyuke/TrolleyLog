@@ -35,11 +35,18 @@ class RideStore(private val file: File) {
 
     fun delete(id: String) = update(state.value.filter { it.id != id })
 
-    /** Adds the rides that are not in the log yet. Rides already here are left as they are. */
+    /**
+     * Adds the rides that are not in the log yet. Rides already here are left
+     * as they are. A ride counts as already here by its id, or when one on
+     * the same date has the same boarding time and car.
+     */
     fun import(incoming: List<Ride>): ImportResult {
         val known = state.value.mapTo(HashSet()) { it.id }
-        val fresh = incoming.filter { known.add(it.id) }
+        val trips = state.value.mapTo(HashSet(), ::sameRideKey)
+        val fresh = incoming.filter { known.add(it.id) and trips.add(sameRideKey(it)) }
         if (fresh.isNotEmpty()) update(state.value + fresh)
         return ImportResult(fresh.size, incoming.size - fresh.size)
     }
+
+    private fun sameRideKey(r: Ride) = Triple(r.date, r.boardedAt, r.car.uppercase())
 }

@@ -40,7 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.nextcolor.trolleylog.data.CarSeries
 import org.nextcolor.trolleylog.data.Network
+import org.nextcolor.trolleylog.data.PlaceInCar
 import org.nextcolor.trolleylog.data.Ride
+import org.nextcolor.trolleylog.data.TrainPart
 import org.nextcolor.trolleylog.logic.Stats
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -76,7 +78,10 @@ fun StatsScreen(rides: List<Ride>, today: LocalDate, modifier: Modifier = Modifi
                 .sumOf { it.numbers.count() }
             Tile("Rides", "${s.rides}", "on ${s.days} ${if (s.days == 1) "day" else "days"}", tile)
             Tile("Day streak", "${s.currentStreak}", "best ${s.longestStreak}", tile)
-            Tile("Time on board", hours(s.minutesOnBoard), "over ${s.timedRides} rides", tile)
+            Tile(
+                if (s.estimatedRides > 0) "Total ride time (est.)" else "Total ride time",
+                hours(s.minutesOnBoard), "over ${s.timedRides} rides", tile,
+            )
             Tile("Distance", "${(s.km * MILES_PER_KM).roundToInt()} mi", "by rail", tile)
             Tile("Stations", "${s.stationsVisited}", "of ${Network.stations.size}", tile)
             Tile("Cars ridden", "${s.carsRidden.values.sumOf { it.size }}", "of $fleetSize", tile)
@@ -105,7 +110,8 @@ fun StatsScreen(rides: List<Ride>, today: LocalDate, modifier: Modifier = Modifi
             }
         }
 
-        if (s.positions.isNotEmpty()) StatSection("Car position") {
+        val places = s.places.values.sum()
+        if (s.positions.isNotEmpty() || s.parts.isNotEmpty() || places > 0) StatSection("Car position") {
             for ((length, counts) in s.positions.toSortedMap()) {
                 Text(
                     if (length == 1) "Single car" else "$length-car trains",
@@ -113,9 +119,18 @@ fun StatsScreen(rides: List<Ride>, today: LocalDate, modifier: Modifier = Modifi
                 )
                 TrainStrip(length, selected = null, shape = null, counts = counts)
             }
+            if (s.parts.isNotEmpty()) {
+                // Front, middle, and rear line up with the cars of a three-car train.
+                Text("Train length not noted", style = MaterialTheme.typography.labelLarge)
+                TrainStrip(3, selected = null, shape = null, counts = TrainPart.entries.associate { it.ordinal + 1 to (s.parts[it] ?: 0) })
+            }
             if (s.endA + s.endB > 0) {
                 Spacer(Modifier.height(4.dp))
                 SplitBar("A end", s.endA, "B end", s.endB)
+            }
+            if (places > 0) {
+                Spacer(Modifier.height(4.dp))
+                SplitBar("Front of car", s.places[PlaceInCar.FRONT] ?: 0, "Back of car", s.places[PlaceInCar.BACK] ?: 0)
             }
         }
 

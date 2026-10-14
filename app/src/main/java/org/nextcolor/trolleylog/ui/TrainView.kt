@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.nextcolor.trolleylog.data.CarShape
+import org.nextcolor.trolleylog.data.Ride
 
 /** Height of a car drawing as a fraction of its length, rail to raised pantograph. */
 private const val CAR_ASPECT = 0.17f
@@ -111,6 +112,12 @@ fun carName(position: Int, length: Int): String = when {
     position == length -> "Rear"
     length == 3 -> "Middle"
     else -> ordinal(position)
+}
+
+/** The car of [ride]'s train it was in, or null when not noted. */
+fun carName(ride: Ride): String? = when {
+    ride.position != null && ride.trainLength != null -> carName(ride.position, ride.trainLength)
+    else -> ride.trainPart?.label
 }
 
 /** One car drawn large. Tapping a half picks the A or B end. */

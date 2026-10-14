@@ -9,7 +9,7 @@ Press <b>Board</b> when you board and the date and time are filled in. Type the 
 <li>Likely trips offered first, such as the way back from your earlier ride</li>
 <li>Brochures you picked up, with names you used before as one-tap choices</li>
 <li>Statistics: day streaks, time and distance on board, a chart of the whole fleet with the cars you have ridden, favorite cars, stations, and trips</li>
-<li>Backup and import of every ride, and export to a spreadsheet</li>
+<li>Backup and import of every ride, and spreadsheet export and import</li>
 <li>Colors that follow your wallpaper on Android 12 and later</li>
 </ul>
 

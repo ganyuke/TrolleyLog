@@ -56,19 +56,19 @@ fun SettingsScreen(rides: List<Ride>, store: RideStore, onBack: () -> Unit) {
     }
     val openBackup = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) onMessage(
-            try {
-                val text = context.contentResolver.openInputStream(uri)!!.use { it.readBytes().decodeToString() }
-                val result = store.import(Backup.fromJson(text))
-                when {
-                    result.added == 0 && result.alreadyHere == 0 -> "That backup has no rides in it."
-                    result.added == 0 -> "Nothing to add. All ${result.alreadyHere} rides are already here."
-                    result.alreadyHere == 0 -> "Added ${result.added} rides."
-                    else -> "Added ${result.added} rides. ${result.alreadyHere} were already here."
+            importFrom(context, uri) { text -> importResult(store.import(Backup.fromJson(text)), "backup") }
+        )
+    }
+    val openSheet = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) onMessage(
+            importFrom(context, uri) { text ->
+                val sheet = Backup.fromCsv(text)
+                val result = importResult(store.import(sheet.rides), "spreadsheet")
+                when (sheet.skipped) {
+                    0 -> result
+                    1 -> "$result 1 row without a date or boarding time was skipped."
+                    else -> "$result ${sheet.skipped} rows without a date or boarding time were skipped."
                 }
-            } catch (e: Backup.FormatException) {
-                e.message!!
-            } catch (e: Exception) {
-                "That file could not be opened."
             }
         )
     }
@@ -105,13 +105,18 @@ fun SettingsScreen(rides: List<Ride>, store: RideStore, onBack: () -> Unit) {
                     )
                 }
             }
-            Section("Export") {
+            Section("Spreadsheet") {
                 SegmentedList {
                     Segment(
-                        0, 1, "Export a spreadsheet", Icons.Rounded.TableChart,
+                        0, 2, "Export a spreadsheet", Icons.Rounded.TableChart,
                         onClick = { saveSheet.launch("trolley-log-${LocalDate.now()}.csv") },
                         supporting = "A CSV file for a spreadsheet app.",
                         enabled = rides.isNotEmpty(),
+                    )
+                    Segment(
+                        1, 2, "Import a spreadsheet", Icons.Rounded.FileOpen,
+                        onClick = { openSheet.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain", "application/octet-stream")) },
+                        supporting = "Adds rides from a CSV file. Rides already here are not changed.",
                     )
                 }
             }
@@ -123,6 +128,22 @@ fun SettingsScreen(rides: List<Ride>, store: RideStore, onBack: () -> Unit) {
             )
         }
     }
+}
+
+/** Reads the file as text and hands it to [read], which returns the message to show. */
+private fun importFrom(context: Context, uri: Uri, read: (String) -> String): String = try {
+    read(context.contentResolver.openInputStream(uri)!!.use { it.readBytes().decodeToString() })
+} catch (e: Backup.FormatException) {
+    e.message!!
+} catch (e: Exception) {
+    "That file could not be opened."
+}
+
+private fun importResult(result: RideStore.ImportResult, kind: String): String = when {
+    result.added == 0 && result.alreadyHere == 0 -> "That $kind has no rides in it."
+    result.added == 0 -> "Nothing to add. All ${result.alreadyHere} rides are already here."
+    result.alreadyHere == 0 -> "Added ${result.added} rides."
+    else -> "Added ${result.added} rides. ${result.alreadyHere} were already here."
 }
 
 private fun write(context: Context, uri: Uri, text: String, done: String): String = try {

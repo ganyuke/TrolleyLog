@@ -91,13 +91,14 @@ fun Segment(
     ) { Text(headline) }
 }
 
-/** Connected toggle buttons for picking one of a few options. */
+/** Connected toggle buttons for picking one of a few options. [weight] widens options with longer labels. */
 @Composable
 fun <T> ChoiceGroup(
     options: List<T>,
     selected: T?,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    weight: (T) -> Float = { 1f },
     label: @Composable (T) -> Unit,
 ) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
@@ -105,7 +106,7 @@ fun <T> ChoiceGroup(
             ToggleButton(
                 checked = option == selected,
                 onCheckedChange = { onSelect(option) },
-                modifier = Modifier.weight(1f).semantics { role = Role.RadioButton },
+                modifier = Modifier.weight(weight(option)).semantics { role = Role.RadioButton },
                 shapes = when (i) {
                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
                     options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
