@@ -267,4 +267,20 @@ class LogicTest {
         assertEquals(3, RideStore(file).rides.value.size)
         file.delete()
     }
+
+    @Test fun importAndReplace() {
+        val file = File.createTempFile("rides", ".json")
+        val store = RideStore(file)
+        // Logged in the app, so it has a random id and matches by date, time, and car.
+        store.save(Samples.morning.copy(id = "logged", trainLength = null))
+        store.save(Samples.history[0].copy(trainLength = null))
+        store.save(Samples.history[1])
+        val sheet = Backup.fromCsv(Backup.toCsv(listOf(Samples.morning, Samples.history[0], Samples.history[1], Samples.history[2])))
+        assertEquals(RideStore.ReplaceResult(added = 1, replaced = 2, unchanged = 1), store.replace(sheet.rides))
+        val after = RideStore(file).rides.value
+        assertEquals(4, after.size)
+        assertEquals(Samples.morning.trainLength, after.single { it.id == "logged" }.trainLength)
+        assertEquals(RideStore.ReplaceResult(added = 0, replaced = 0, unchanged = 4), store.replace(sheet.rides))
+        file.delete()
+    }
 }

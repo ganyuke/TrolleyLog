@@ -14,6 +14,7 @@ class RideStore(private val file: File) {
     val rides: StateFlow<List<Ride>> = state
 
     data class ImportResult(val added: Int, val alreadyHere: Int)
+    data class ReplaceResult(val added: Int, val replaced: Int, val unchanged: Int)
 
     private fun load(): List<Ride> =
         if (file.exists()) runCatching { Backup.fromJson(file.readText()) }.getOrDefault(emptyList())
@@ -46,6 +47,36 @@ class RideStore(private val file: File) {
         val fresh = incoming.filter { known.add(it.id) and trips.add(sameRideKey(it)) }
         if (fresh.isNotEmpty()) update(state.value + fresh)
         return ImportResult(fresh.size, incoming.size - fresh.size)
+    }
+
+    /**
+     * Adds the rides that are not in the log yet and replaces the ones that
+     * are with the incoming version, matched as in [import]. A replaced ride
+     * keeps its id. Rides that are not in [incoming] are left as they are.
+     */
+    fun replace(incoming: List<Ride>): ReplaceResult {
+        val byId = state.value.associateBy { it.id }
+        val byTrip = state.value.associateBy(::sameRideKey)
+        val result = state.value.associateByTo(LinkedHashMap()) { it.id }
+        var added = 0
+        var replaced = 0
+        var unchanged = 0
+        val seen = HashSet<String>()
+        for (ride in incoming) {
+            val old = byId[ride.id] ?: byTrip[sameRideKey(ride)]
+            val id = old?.id ?: ride.id
+            // A second row for a ride already handled from this file is not counted again.
+            if (!seen.add(id)) continue
+            val new = ride.copy(id = id)
+            when {
+                old == null -> added++
+                old == new -> unchanged++
+                else -> replaced++
+            }
+            result[id] = new
+        }
+        if (added + replaced > 0) update(result.values.toList())
+        return ReplaceResult(added, replaced, unchanged)
     }
 
     private fun sameRideKey(r: Ride) = Triple(r.date, r.boardedAt, r.car.uppercase())
